@@ -1,0 +1,32 @@
+---
+- name: Install and Configure Apache2 Web Server
+  hosts: webservers
+  become: yes  # Mengaktifkan sudo agar bisa menjalankan perintah sebagai root
+  tasks:
+    - name: Update the apt package list
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Ensure Apache2 is started and enabled
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Create a custom index.html page
+      copy:
+        dest: /var/www/html/index.html
+        content: "<h1>Welcome to Apache2 on {{ ansible_hostname }}!</h1>"
+        mode: '0644'
+
+    - name: Open port 80 on UFW firewall (if UFW is installed)
+      ufw:
+        rule: allow
+        port: 80
+        proto: tcp
+      ignore_errors: yes  # Mengabaikan error jika UFW tidak terinstal
